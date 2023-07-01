@@ -10,8 +10,9 @@ app.use(bodyParser.json());
 app.post('/upload', upload.single('image'), (req, res) => {
   if (req.file) {
     const filePath = req.file.path;
-    
     sharp(filePath)
+      .resize(600, 600, { fit: 'inside' })
+      .withMetadata() 
       .toBuffer()
       .then(imageData => {
         res.writeHead(200, {
