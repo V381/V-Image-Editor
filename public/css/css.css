@@ -62,4 +62,13 @@ body {
     width: 100%;
   }
 
-  
+.image-container {
+    width: 800px;
+    height: auto;
+    overflow: hidden;
+  }
+
+  .image-container img {
+    width: 100%;
+    height: auto;
+  }
