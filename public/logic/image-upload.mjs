@@ -1,10 +1,12 @@
 export function uploadImage() {
     const uploadButton = document.querySelector('.upload-button');
     const uploadInput = document.querySelector('.upload-input');
-    const flipButton = document.querySelector(".flip-button");
+    const flipButton = document.querySelector('.flip-button');
+    const rotateButton = document.querySelector('.rotate-button');
     const image = document.querySelector('.uploaded-image');
-    const saveButton = document.querySelector(".save-button");
+    const saveButton = document.querySelector('.save-button');
     let isFlipped = false;
+    let rotation = 0;
     let imageData = null;
   
     uploadButton.addEventListener('click', () => {
@@ -12,9 +14,11 @@ export function uploadImage() {
     });
   
     flipButton.addEventListener('click', () => {
-      if (image.src) {
-        flipImage();
-      }
+      flipImage();
+    });
+  
+    rotateButton.addEventListener('click', () => {
+      rotateImage();
     });
   
     uploadInput.addEventListener('change', handleImageUpload);
@@ -30,78 +34,110 @@ export function uploadImage() {
           method: 'POST',
           body: formData
         })
-        .then(response => response.blob())
-        .then(blob => {
-          imageData = blob;
-          const imageUrl = URL.createObjectURL(blob);
-          image.src = imageUrl;
-          isFlipped = false;
-        })
-        .catch(error => {
-          console.error('Error:', error);
-        });
+          .then(response => response.blob())
+          .then(blob => {
+            imageData = blob;
+            const imageUrl = URL.createObjectURL(blob);
+            image.src = imageUrl;
+            isFlipped = false;
+            rotation = 0;
+            applyTransformations();
+          })
+          .catch(error => {
+            console.error('Error:', error);
+          });
       }
     }
   
     function flipImage() {
-        if (isFlipped) {
-          image.style.transform = 'scaleX(1)';
-          image.style.transition = 'transform 0.3s ease';
-        } else {
-          image.style.transform = 'scaleX(-1)';
-          image.style.transition = 'transform 0.3s ease';
-        }
+      if (image.src) {
         isFlipped = !isFlipped;
+        applyTransformations();
       }
-    
-    saveButton.addEventListener('click', saveFlippedImage);
-
-    function flipImage() {
-        const image = document.querySelector('.image-container img');
-        if (image.src) {
-            if (isFlipped) {
-              image.style.transform = 'scaleX(1)';
-              image.style.transition = 'transform 0.3s ease';
-            } else {
-              image.style.transform = 'scaleX(-1)';
-              image.style.transition = 'transform 0.3s ease';
-            }
-            isFlipped = !isFlipped;
-          }
+    }
+  
+    function rotateImage() {
+      if (image.src) {
+        rotation += 90;
+        applyTransformations();
       }
-    
-      async function saveFlippedImage() {
-        if (imageData) {
-          let flippedImageData = imageData;
-          if (isFlipped) {
-            flippedImageData = await flipImageData(imageData);
-          }
-          const downloadLink = document.createElement('a');
-          downloadLink.href = URL.createObjectURL(flippedImageData);
-          downloadLink.download = 'flipped_image.png';
-          downloadLink.click();
+    }
+  
+    saveButton.addEventListener('click', saveTransformedImage);
+  
+    async function saveTransformedImage() {
+      if (imageData) {
+        let transformedImageData = imageData;
+        if (isFlipped || rotation !== 0) {
+          transformedImageData = await applyTransformationsToImageData(imageData);
         }
+        const downloadLink = document.createElement('a');
+        downloadLink.href = URL.createObjectURL(transformedImageData);
+        downloadLink.download = 'transformed_image.png';
+        downloadLink.click();
       }
-    
-      function flipImageData(imageData) {
-        return new Promise(resolve => {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            const img = new Image();
-            img.onload = () => {
-              const canvas = document.createElement('canvas');
-              canvas.width = img.width;
-              canvas.height = img.height;
-              const ctx = canvas.getContext('2d');
-              ctx.translate(img.width, 0);
-              ctx.scale(-1, 1);
-              ctx.drawImage(img, 0, 0);
-              canvas.toBlob(resolve, 'image/png');
-            };
-            img.src = reader.result;
+    }
+  
+    async function applyTransformationsToImageData(imageData) {
+      let transformedData = imageData;
+      if (isFlipped || rotation !== 0) {
+        transformedData = await flipAndRotateImageData(imageData);
+      }
+      return transformedData;
+    }
+  
+    function flipAndRotateImageData(imageData) {
+      return new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+  
+            let canvasWidth = img.width;
+            let canvasHeight = img.height;
+            let offsetX = 0;
+            let offsetY = 0;
+  
+            if (rotation === 90 || rotation === 270) {
+              canvasWidth = img.height;
+              canvasHeight = img.width;
+              offsetX = (canvasWidth - img.width) / 2;
+              offsetY = (canvasHeight - img.height) / 2;
+            }
+  
+            canvas.width = canvasWidth;
+            canvas.height = canvasHeight;
+  
+            context.save();
+            context.translate(canvas.width / 2, canvas.height / 2);
+            context.rotate((rotation * Math.PI) / 180);
+            context.scale(isFlipped ? -1 : 1, 1);
+            context.drawImage(img, -img.width / 2, -img.height / 2);
+            context.restore();
+  
+            canvas.toBlob(resolve, 'image/png');
           };
-          reader.readAsDataURL(imageData);
-        });
+          img.src = reader.result;
+        };
+        reader.readAsDataURL(imageData);
+      });
+    }
+  
+    function applyTransformations() {
+      let transform = '';
+  
+      if (isFlipped) {
+        transform += 'scaleX(-1) ';
       }
+  
+      if (rotation !== 0) {
+        transform += `rotate(${rotation}deg)`;
+      }
+  
+      image.style.transform = transform;
+      image.style.transition = 'transform 0.3s ease';
+    }
   }
   
