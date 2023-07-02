@@ -93,32 +93,40 @@ class ImageEditor {
     }
   
     resizeImage() {
-      if (this.image.src) {
-        const newWidth = prompt('Enter the new width:');
-        const newHeight = prompt('Enter the new height:');
-  
-        if (newWidth && newHeight) {
-          const canvas = document.createElement('canvas');
-          const context = canvas.getContext('2d');
-  
-          const img = new Image();
-          img.onload = () => {
-            canvas.width = newWidth;
-            canvas.height = newHeight;
-            context.drawImage(img, 0, 0, newWidth, newHeight);
-  
-            const resizedImageData = canvas.toDataURL('image/png');
-            const blob = this.dataURLToBlob(resizedImageData);
-  
-            this.image.src = URL.createObjectURL(blob);
-            this.imageData = blob;
-            this.applyTransformations();
-            this.notifyObservers();
-          };
-          img.src = this.image.src;
+        if (this.image.src) {
+          const newWidth = prompt('Enter the new width:');
+          const newHeight = prompt('Enter the new height:');
+      
+          if (newWidth && newHeight) {
+            const width = parseInt(newWidth);
+            const height = parseInt(newHeight);
+      
+            if (width <= 800 && height <= 800) {
+              const canvas = document.createElement('canvas');
+              const context = canvas.getContext('2d');
+      
+              const img = new Image();
+              img.onload = () => {
+                canvas.width = width;
+                canvas.height = height;
+                context.drawImage(img, 0, 0, width, height);
+      
+                const resizedImageData = canvas.toDataURL('image/png');
+                const blob = this.dataURLToBlob(resizedImageData);
+      
+                this.image.src = URL.createObjectURL(blob);
+                this.imageData = blob;
+                this.applyTransformations();
+                this.notifyObservers();
+              };
+              img.src = this.image.src;
+            } else {
+              // Display an error message
+              alert('Dimensions should be within 800x800 limit.');
+            }
+          }
         }
-      }
-    }
+      }      
   
     saveTransformedImage() {
       if (this.imageData) {
