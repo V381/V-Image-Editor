@@ -102,8 +102,19 @@ class ImageEditor {
             const height = parseInt(newHeight);
       
             if (width <= 800 && height <= 800) {
+                this.image.classList.add('animate');  
               const canvas = document.createElement('canvas');
               const context = canvas.getContext('2d');
+
+              setTimeout(() => {
+                this.image.style.width = newWidth + 'px';
+                this.image.style.height = newHeight + 'px';
+            
+                // Remove animate class after the animation is complete
+                setTimeout(() => {
+                  this.image.classList.remove('animate');
+                }, 300); // Adjust the delay to match the animation duration in milliseconds
+              }, 10); 
       
               const img = new Image();
               img.onload = () => {
@@ -121,7 +132,6 @@ class ImageEditor {
               };
               img.src = this.image.src;
             } else {
-              // Display an error message
               alert('Dimensions should be within 800x800 limit.');
             }
           }

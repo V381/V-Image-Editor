@@ -72,6 +72,24 @@ body {
     width: 100%;
     height: auto;
     image-rendering: crisp-edges; /* or pixelated */  }
+
+    img {
+      transition: width 1s, height 1s;
+    }
+    
+    img.animate {
+      animation: resizeAnimation 0.3s;
+    }
+    
+    @keyframes resizeAnimation {
+      from {
+        transform: scale(1);
+      }
+      to {
+        transform: scale(1.1);
+      }
+    }
+    
   
 .resize-inputs {
   display: flex;
@@ -83,4 +101,20 @@ canvas.animate {
 
 .canvas-container {
   overflow: hidden;
+}
+
+.save-button {
+    padding: 10px 20px;
+    background-color: #555;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+    width: 100%;
+}
+
+.save-button:hover {
+  cursor: pointer;
+  background-color: #3a3a3a;
 }
