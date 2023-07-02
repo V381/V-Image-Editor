@@ -12,7 +12,7 @@ app.post('/upload', upload.single('image'), (req, res) => {
     const filePath = req.file.path;
     sharp(filePath)
       .resize(600, 600, { fit: 'inside' })
-      .withMetadata() 
+      .withMetadata()
       .toBuffer()
       .then(imageData => {
         res.writeHead(200, {

@@ -62,15 +62,25 @@ body {
     width: 100%;
   }
 
-.image-container {
-    width: 800px;
+  .image-container {
+    width: auto;
     height: auto;
     overflow: hidden;
   }
-
+  
   .image-container img {
     width: 100%;
     height: auto;
-  }
-
+    image-rendering: crisp-edges; /* or pixelated */  }
   
+.resize-inputs {
+  display: flex;
+}
+
+canvas.animate {
+  transition: transform 0.3s ease;
+}
+
+.canvas-container {
+  overflow: hidden;
+}
